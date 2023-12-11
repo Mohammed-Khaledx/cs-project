@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .work {
+        height: 100vh;
+        background: linear-gradient(to right, #0c58e4, rgb(191, 38, 27));
+        top: 50%;
+      }
+
+      .prog {
+        padding-top: 150px;
+      }
+
+      /* Style the container element */
+      .work #container {
+        padding: 5px;
+
+        height: fit-content;
+        margin: 0 auto; /* Center horizontally */
+
+        display: flex;
+        /* Center vertically */
+        align-items: end;
+        justify-content: center;
+        padding: 25px 30px;
+        border-radius: 5px;
+        max-width: 700px;
+        width: 100%;
+      }
+
+      /* Style the output element */
+      #output {
+        width: 700px;
+        height: 50px;
+
+        margin: 0 auto; /* Center horizontally */
+        /* border: 1px solid black; */
+        border-radius: 5px;
+        text-align: center;
+        line-height: 50px;
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        vertical-align: middle; /* Center vertically */
+      }
+
+      /* Style the bar elements */
+      .bar {
+        width: 50px;
+        border-radius: 5px;
+        margin: 0 auto; /* Center horizontally */
+        background-color: #00a0ff; /* Accent color */
+        padding-top: 10px;
+        color: black;
+        font-family: Arial, sans-serif;
+        font-size: 20px;
+        text-align: center;
+        transition: ease 0.5s;
+      }
+      .bar:hover {
+        transform: scale(1.1);
+      }
+      .type {
+        display: flex;
+        height: 50px;
+        justify-content: center;
+        align-items: center;
+      }
+      .selection {
+        padding: 20px;
+        border-radius: 50px;
+        margin-left: 20px;
+        background-color: #00a0ff;
+      }
+      .bubble {
+        padding: 20px;
+        margin-left: 20px;
+        border-radius: 50px;
+        background-color: #00a0ff;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Create the container element -->
+    <div class="work">
+      <div class="prog">
+        <div id="container"></div>
+        <!-- Create the output element -->
+        <div id="output">Sorting…</div>
+        <div class="type">
+          <button id="selection" class="selection">selection</button>
+          <button id="bubble" class="bubble">bubble</button>
+          <button id="selection-cancel" class="selection">
+            selectionCancel
+          </button>
+          <button id="bubble-cancel" class="bubble">bubbleCancel</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Declare and initialize the array
+      var arr = [2, 8, 7, 9, 6, 5, 1, 3];
+
+      // Get the HTML elements
+      var container = document.getElementById("container");
+      var output = document.getElementById("output");
+
+      // Create a function to display the array as bars
+      function displayArray() {
+        // Clear the container
+        container.innerHTML = "";
+        // Loop through the array
+        for (var i = 0; i < arr.length; i++) {
+          // Create a div element for each array element
+          var bar = document.createElement("div"); // Set the class, height, and text of the bar
+          bar.className = "bar";
+          bar.style.height = arr[i] * 50 + "px";
+          bar.textContent = arr[i]; // Append the bar to the container
+          container.appendChild(bar);
+        }
+      }
+
+      // Create a function to swap two array elements
+      function swap(i, j) {
+        // Swap the values
+        var temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+        // Display the array after swapping
+        displayArray();
+        // Display the output message
+        output.textContent = "Swapped " + arr[i] + " and " + arr[j];
+      }
+
+      function highlight(i, j, color) {
+        // Get the bars corresponding to the array elements
+        var bar1 = container.children[i];
+        var bar2 = container.children[j];
+        // Set the background color of the bars
+        bar1.style.backgroundColor = color;
+        bar2.style.backgroundColor = color;
+      }
+
+      const selectionController = new AbortController();
+      const bubbleController = new AbortController();
+
+      const selectionSignal = selectionController.signal;
+      const bubbleSignal = bubbleController.signal;
+
+      function delay(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      let quit = false;
+
+      async function selectionSort(selectionSignal) {
+        for (let i = 0; i < arr.length; i++) {
+          let min = i;
+          for (let j = i + 1; j < arr.length; j++) {
+            // Check if the operation has been aborted
+            if (quit) {
+              quit = false;
+              console.log("Selection sort aborted");
+              return;
+            }
+
+            if (arr[j] < arr[min]) {
+              min = j;
+            }
+          }
+          highlight(i, min, "#f0f0f0");
+
+          await delay(1000);
+          swap(i, min); // Wait for one second
+          await delay(1000);
+          highlight(i, i, "#00a0ff");
+        }
+      }
+
+      // async function quickSort(start = 0, end = arr.length - 1) {
+      //   if (start >= end) {
+      //     return;
+      //   }
+
+      //   // Start partitioning the array
+
+      //   let pivot = arr[end];
+      //   let j = start - 1;
+      //   highlight(end, end, "black");
+      //   await delay(1000);
+
+      //   for (let i = start; i <= end - 1; i++) {
+      //     if (arr[i] < pivot) {
+      //       j++;
+      //       highlight(i, j, "#f0f0f0");
+      //       await delay(1000);
+      //       swap(i, j); // Swap the elements
+      //       await delay(1000);
+      //     }
+      //   }
+      //   // Move the pivot element to its correct position
+
+      //   j++;
+      //   highlight(j, j, "black");
+      //   await delay(1000);
+
+      //   swap(j, end);
+      //   await delay(1000);
+
+      //   const newPivotIndex = j;
+
+      //   // Recursively sort the sub-arrays
+
+      //   quickSort(start, newPivotIndex - 1);
+      //   quickSort(newPivotIndex + 1, end);
+      // }
+
+      async function bubbleSort(bubbleSignal) {
+        let done;
+
+        for (let i = 0; i < arr.length; i++) {
+          done = true;
+
+          for (let j = 1; j < arr.length; j++) {
+            // Check if the operation has been aborted
+            if (quit) {
+              quit = false;
+              console.log("bubble sort aborted");
+              return;
+            }
+
+            if (arr[j] < arr[j - 1]) {
+              highlight(j - 1, j, "#f0f0f0");
+              await delay(1000);
+              swap(j, j - 1); // Wait for one second
+              await delay(1000);
+
+              done = false;
+            } else {
+              highlight(j - 1, j, "red");
+              await delay(500);
+              highlight(j - 1, j, "#00a0ff");
+              await delay(500);
+            }
+          }
+          if (done) break;
+        }
+      }
+
+      // Display the initial array
+      displayArray();
+
+      let btn1 = document.getElementById("selection");
+      let btn2 = document.getElementById("bubble");
+      // Sort the array
+
+      btn1.addEventListener("click", () => selectionSort());
+      btn2.addEventListener("click", () => bubbleSort(bubbleSignal));
+
+      const selectionCancel = document.getElementById("selection-cancel");
+      const bubbleCancel = document.getElementById("bubble-cancel");
+
+      selectionCancel.addEventListener("click", () => {
+        quit = true;
+      });
+
+      bubbleCancel.addEventListener("click", () => {
+        quit = true;
+      });
+    </script>
+  </body>
+</html>
